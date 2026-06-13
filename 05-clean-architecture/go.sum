@@ -1,0 +1,4 @@
+github.com/jacky-htg/go-libs v0.0.0-20260606032030-122301b2edcd h1:1Nk3fSkEzQEe8Cb1uPlGmXfbDUhCar/obcjgqlQAhI4=
+github.com/jacky-htg/go-libs v0.0.0-20260606032030-122301b2edcd/go.mod h1:wcSO7Xey6EWzygU+TZG8/C5BgzQQ8Tnb/FlYwQAa17k=
+github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
+github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=

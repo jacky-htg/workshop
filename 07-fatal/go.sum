@@ -1,0 +1,6 @@
+github.com/jacky-htg/go-libs v0.0.0-20260606093541-e1386a9ba4a0 h1:DxO6QJOCW257XL2o5p2xzTKIqhPo1D/z0LeFH+mi/jg=
+github.com/jacky-htg/go-libs v0.0.0-20260606093541-e1386a9ba4a0/go.mod h1:WAzLAqYLw3Oa9w2G3eatvfsEuhUBNggcotsjdiilY9U=
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
+github.com/lib/pq v1.12.3 h1:tTWxr2YLKwIvK90ZXEw8GP7UFHtcbTtty8zsI+YjrfQ=
+github.com/lib/pq v1.12.3/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
