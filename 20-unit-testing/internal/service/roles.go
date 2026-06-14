@@ -103,13 +103,13 @@ func (u *roles) Grant(ctx context.Context, roleID, accessID int) *errors.Busines
 func (u *roles) Revoke(ctx context.Context, roleID, accessID int) *errors.BusinessError {
 	hasAccess, err := u.repo.HasAccess(ctx, roleID, accessID)
 	if err != nil {
-		return errors.InternalServerErrorWrap(err, "error grant access")
+		return errors.InternalServerErrorWrap(err, "error revoke access")
 	}
 
 	if hasAccess {
 		err = u.repo.RevokeAccess(ctx, roleID, accessID)
 		if err != nil {
-			return errors.InternalServerErrorWrap(err, "error grant access")
+			return errors.InternalServerErrorWrap(err, "error revoke access")
 		}
 	}
 	return nil

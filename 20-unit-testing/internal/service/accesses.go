@@ -19,7 +19,7 @@ import (
 
 type Accesses interface {
 	List(ctx context.Context) (map[int]*model.AccessTree, *errors.BusinessError)
-	ScanAccess(ctx context.Context) error
+	ScanAccess(ctx context.Context, path string) error
 }
 
 type accesses struct {
@@ -54,13 +54,12 @@ func (u *accesses) List(ctx context.Context) (map[int]*model.AccessTree, *errors
 		}
 	}
 
-	fmt.Printf("result : %v", results)
 	return results, nil
 }
 
-func (u *accesses) ScanAccess(ctx context.Context) error {
+func (u *accesses) ScanAccess(ctx context.Context, path string) error {
 	// Parse route definitions from router file
-	routes, err := parseRouteDefinitions("internal/router/api.go")
+	routes, err := parseRouteDefinitions(path)
 	if err != nil {
 		return fmt.Errorf("failed to parse route definitions: %w", err)
 	}
@@ -81,7 +80,7 @@ func (u *accesses) ScanAccess(ctx context.Context) error {
 	tx, err := u.db.BeginTx(ctx, nil)
 	if err != nil {
 		u.log.Error(ctx, "error begin tx", slog.Any("error", err))
-		return errors.InternalServerErrorWrap(err)
+		return err
 	}
 	defer tx.Rollback()
 
@@ -114,7 +113,7 @@ func (u *accesses) ScanAccess(ctx context.Context) error {
 	}
 
 	if err = tx.Commit(); err != nil {
-		return errors.InternalServerErrorWrap(err)
+		return err
 	}
 
 	return nil
@@ -153,17 +152,6 @@ func parseRouteDefinitions(filePath string) ([]app.RouteDefinition, error) {
 							if route, err := parseRouteFromCompositeLit(elt); err == nil {
 								routes = append(routes, route)
 							}
-						}
-					}
-				}
-			}
-
-			// Alternative: check for direct ident (if type is just RouteDefinition)
-			if ident, ok := arrayType.Elt.(*ast.Ident); ok {
-				if ident.Name == "RouteDefinition" {
-					for _, elt := range compLit.Elts {
-						if route, err := parseRouteFromCompositeLit(elt); err == nil {
-							routes = append(routes, route)
 						}
 					}
 				}
@@ -217,11 +205,6 @@ func parseRouteFromCompositeLit(expr ast.Expr) (app.RouteDefinition, error) {
 				route.Alias = strings.Trim(value.Value, `"`)
 			}
 		}
-	}
-
-	if route.Method == "" || route.Path == "" || route.Group == "" || route.Alias == "" {
-		return app.RouteDefinition{}, fmt.Errorf("incomplete route definition: method=%s, path=%s, group=%s, alias=%s",
-			route.Method, route.Path, route.Group, route.Alias)
 	}
 
 	return route, nil

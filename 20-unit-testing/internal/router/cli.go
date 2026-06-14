@@ -29,7 +29,7 @@ func Cli(
 		}
 		log.Info(context.Background(), "Migration completed successfully")
 	case "scan-access":
-		err := accessService.ScanAccess(context.Background())
+		err := accessService.ScanAccess(context.Background(), "internal/router/api.go")
 		if err != nil {
 			log.Error(context.Background(), "Scan Access failed", "error", err)
 			return err
