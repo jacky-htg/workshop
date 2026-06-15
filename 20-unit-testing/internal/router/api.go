@@ -24,14 +24,6 @@ func Api(
 	log logger.Logger,
 	validate *validator.Validate,
 ) http.Handler {
-	mux := http.NewServeMux()
-
-	base := middleware.Stack{
-		mid.Recovery(log),
-		mid.Timeout(log, cfg.Server.GatewayTimeout),
-	}
-	private := base.With(mid.Auth(db, log))
-
 	accessRepository := repository.NewAccessRepository(db, log)
 	roleRepository := repository.NewRoleRepository(db, log)
 	userRepository := repository.NewUserRepository(db, log)
@@ -46,6 +38,13 @@ func Api(
 	roleHandler := handler.NewRoleHandler(log, validate, roleService)
 	userHandler := handler.NewUserHandler(log, validate, userService)
 
+	base := middleware.Stack{
+		mid.Recovery(log),
+		mid.Timeout(log, cfg.Server.GatewayTimeout),
+	}
+	private := base.With(mid.Auth(db, log, userRepository))
+
+	mux := http.NewServeMux()
 	mux.Handle("GET /health", base.Then(func(w http.ResponseWriter, r *http.Request) {
 		response.SetOk(r.Context(), log, w, struct{}{})
 	}))

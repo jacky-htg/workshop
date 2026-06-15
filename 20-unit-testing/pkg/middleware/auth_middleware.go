@@ -16,7 +16,7 @@ import (
 	"github.com/jacky-htg/go-libs/token"
 )
 
-func Auth(db *sql.DB, log logger.Logger) lib.Middleware {
+func Auth(db *sql.DB, log logger.Logger, repo repository.UserRepository) lib.Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -45,7 +45,6 @@ func Auth(db *sql.DB, log logger.Logger) lib.Middleware {
 			}
 
 			email := token.GetString(claim, "email")
-			repo := repository.NewUserRepository(db, log)
 			hasPermission := repo.HasPermission(
 				ctx,
 				email,
