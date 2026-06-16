@@ -1,0 +1,18 @@
+{
+    "go.buildTags": "integration",
+    "go.testTags": "integration",
+    "go.testTimeout": "120s",
+    "go.testFlags": ["-v", "-count=1"],
+    "gopls": {
+        "build.env": {
+            "GOFLAGS": "-tags=integration"
+        },
+        "build.directoryFilters": [
+            "-node_modules",
+            "-vendor",
+            "-testdata"
+        ],
+        "ui.semanticTokens": true,
+        "ui.completion.usePlaceholders": true
+    }
+}
