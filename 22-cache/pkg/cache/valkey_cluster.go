@@ -83,16 +83,17 @@ func (c *clusterCache) Ping(ctx context.Context) (string, error) {
 	return c.client.Ping(ctx)
 }
 
-func (c *clusterCache) Set(ctx context.Context, key string, value string) error {
-	_, err := c.client.Set(ctx, key, value)
-	return err
-}
+func (c *clusterCache) Exists(ctx context.Context, key string) (bool, error) {
+	count, err := c.client.Exists(ctx, []string{key})
+	if err != nil {
+		return false, err
+	}
 
-func (c *clusterCache) SetWithExpiry(ctx context.Context, key string, value string, expiry time.Duration) error {
-	_, err := c.client.SetWithOptions(ctx, key, value, options.SetOptions{
-		Expiry: options.NewExpiryIn(expiry),
-	})
-	return err
+	if count > 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (c *clusterCache) Get(ctx context.Context, key string) (string, error) {
@@ -108,6 +109,18 @@ func (c *clusterCache) Get(ctx context.Context, key string) (string, error) {
 	return result.Value(), nil
 }
 
+func (c *clusterCache) Set(ctx context.Context, key string, value string) error {
+	_, err := c.client.Set(ctx, key, value)
+	return err
+}
+
+func (c *clusterCache) SetWithExpiry(ctx context.Context, key string, value string, expiry time.Duration) error {
+	_, err := c.client.SetWithOptions(ctx, key, value, options.SetOptions{
+		Expiry: options.NewExpiryIn(expiry),
+	})
+	return err
+}
+
 func (c *clusterCache) Del(ctx context.Context, keys []string) (int64, error) {
 	return c.client.Del(ctx, keys)
 }
@@ -115,25 +128,6 @@ func (c *clusterCache) Del(ctx context.Context, keys []string) (int64, error) {
 func (c *clusterCache) Close() error {
 	c.client.Close()
 	return nil
-}
-
-func (c *clusterCache) parseAddresses(nodes []string) ([]config.NodeAddress, error) {
-	addresses := make([]config.NodeAddress, 0, len(nodes))
-	for _, node := range nodes {
-		parts := strings.Split(node, ":")
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid node format: %s (expected host:port)", node)
-		}
-		port, err := strconv.Atoi(parts[1])
-		if err != nil {
-			return nil, fmt.Errorf("invalid port in node: %s", node)
-		}
-		addresses = append(addresses, config.NodeAddress{
-			Host: parts[0],
-			Port: port,
-		})
-	}
-	return addresses, nil
 }
 
 func (c *clusterCache) GetJSON(ctx context.Context, key string, dest interface{}) error {
@@ -204,19 +198,6 @@ func (c *clusterCache) SCard(ctx context.Context, key string) (int64, error) {
 	return c.client.SCard(ctx, key)
 }
 
-func (c *clusterCache) Exists(ctx context.Context, key string) (bool, error) {
-	count, err := c.client.Exists(ctx, []string{key})
-	if err != nil {
-		return false, err
-	}
-
-	if count > 0 {
-		return false, nil
-	}
-
-	return true, nil
-}
-
 func (c *clusterCache) SRem(ctx context.Context, key string, value ...string) error {
 	_, err := c.client.SRem(ctx, key, value)
 	return err
@@ -229,4 +210,23 @@ func (c *clusterCache) SScan(ctx context.Context, key string, cursor string, def
 		return nil, "", fmt.Errorf("failed to SScan key %s: %w", key, err)
 	}
 	return result.Data, result.Cursor.String(), nil
+}
+
+func (c *clusterCache) parseAddresses(nodes []string) ([]config.NodeAddress, error) {
+	addresses := make([]config.NodeAddress, 0, len(nodes))
+	for _, node := range nodes {
+		parts := strings.Split(node, ":")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid node format: %s (expected host:port)", node)
+		}
+		port, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return nil, fmt.Errorf("invalid port in node: %s", node)
+		}
+		addresses = append(addresses, config.NodeAddress{
+			Host: parts[0],
+			Port: port,
+		})
+	}
+	return addresses, nil
 }

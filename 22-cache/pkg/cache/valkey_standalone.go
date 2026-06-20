@@ -54,16 +54,17 @@ func (s *standaloneCache) Ping(ctx context.Context) (string, error) {
 	return s.client.Ping(ctx)
 }
 
-func (s *standaloneCache) Set(ctx context.Context, key string, value string) error {
-	_, err := s.client.Set(ctx, key, value)
-	return err
-}
+func (s *standaloneCache) Exists(ctx context.Context, key string) (bool, error) {
+	count, err := s.client.Exists(ctx, []string{key})
+	if err != nil {
+		return false, err
+	}
 
-func (s *standaloneCache) SetWithExpiry(ctx context.Context, key string, value string, expiry time.Duration) error {
-	_, err := s.client.SetWithOptions(ctx, key, value, options.SetOptions{
-		Expiry: options.NewExpiryIn(expiry),
-	})
-	return err
+	if count > 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (s *standaloneCache) Get(ctx context.Context, key string) (string, error) {
@@ -77,6 +78,18 @@ func (s *standaloneCache) Get(ctx context.Context, key string) (string, error) {
 	}
 
 	return result.Value(), nil
+}
+
+func (s *standaloneCache) Set(ctx context.Context, key string, value string) error {
+	_, err := s.client.Set(ctx, key, value)
+	return err
+}
+
+func (s *standaloneCache) SetWithExpiry(ctx context.Context, key string, value string, expiry time.Duration) error {
+	_, err := s.client.SetWithOptions(ctx, key, value, options.SetOptions{
+		Expiry: options.NewExpiryIn(expiry),
+	})
+	return err
 }
 
 func (s *standaloneCache) Del(ctx context.Context, keys []string) (int64, error) {
@@ -154,19 +167,6 @@ func (s *standaloneCache) SMembers(ctx context.Context, key string) ([]string, e
 
 func (s *standaloneCache) SCard(ctx context.Context, key string) (int64, error) {
 	return s.client.SCard(ctx, key)
-}
-
-func (s *standaloneCache) Exists(ctx context.Context, key string) (bool, error) {
-	count, err := s.client.Exists(ctx, []string{key})
-	if err != nil {
-		return false, err
-	}
-
-	if count > 0 {
-		return false, nil
-	}
-
-	return true, nil
 }
 
 func (s *standaloneCache) SRem(ctx context.Context, key string, value ...string) error {
